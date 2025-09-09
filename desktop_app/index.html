@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KONAK Gallery AI - Professional Photo & Video Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .ai-badges {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .ai-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .workspace {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .preview-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .preview-image, .preview-video {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .drop-zone {
+            border: 3px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone:hover {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+        
+        .controls {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            cursor: pointer;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab.active {
+            color: white;
+            border-bottom-color: #4ECDC4;
+        }
+        
+        .processing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+        }
+        
+        .processing-overlay.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #4ECDC4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ecdc4;
+        }
+        
+        .status-dot.error {
+            background: #ff6b6b;
+        }
+        
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .preset-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .preset-btn.active {
+            background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <h2 style="margin-bottom: 20px;">AI Controls</h2>
+            
+            <div class="tabs">
+                <button class="tab active" data-tab="photo">Photo</button>
+                <button class="tab" data-tab="video">Video</button>
+                <button class="tab" data-tab="batch">Batch</button>
+            </div>
+            
+            <div id="photo-controls" class="tab-content">
+                <div class="controls">
+                    <h3 style="margin-bottom: 15px;">AI Presets</h3>
+                    <div class="preset-grid">
+                        <button class="preset-btn" data-preset="cinematic">Cinematic</button>
+                        <button class="preset-btn" data-preset="wedding">Wedding</button>
+                        <button class="preset-btn" data-preset="portrait">Portrait</button>
+                        <button class="preset-btn" data-preset="landscape">Landscape</button>
+                        <button class="preset-btn" data-preset="film">Film Look</button>
+                        <button class="preset-btn" data-preset="moody">Moody</button>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <h3 style="margin-bottom: 15px;">AI Adjustments</h3>
+                    <div class="control-group">
+                        <label>AI Strength: <span id="ai-strength-value">80</span>%</label>
+                        <input type="range" class="slider" id="ai-strength" min="0" max="100" value="80">
+                    </div>
+                    <div class="control-group">
+                        <label>Skin Protection: <span id="skin-protection-value">90</span>%</label>
+                        <input type="range" class="slider" id="skin-protection" min="0" max="100" value="90">
+                    </div>
+                    <div class="control-group">
+                        <label>Color Grading: <span id="color-grading-value">60</span>%</label>
+                        <input type="range" class="slider" id="color-grading" min="0" max="100" value="60">
+                    </div>
+                </div>
+                
+                <button class="btn" id="process-photo">Process with AI</button>
+                <button class="btn btn-secondary" id="reset-photo">Reset</button>
+                <button class="btn btn-secondary" id="save-photo">Save Result</button>
+            </div>
+            
+            <div id="video-controls" class="tab-content" style="display: none;">
+                <div class="controls">
+                    <h3 style="margin-bottom: 15px;">AI Video Mode</h3>
+                    <button class="btn" id="auto-montage">Auto Montage</button>
+                    <button class="btn" id="scene-detect">Detect Scenes</button>
+                    <button class="btn" id="color-match">Color Match</button>
+                </div>
+                
+                <div class="controls">
+                    <h3 style="margin-bottom: 15px;">Music Sync</h3>
+                    <button class="btn btn-secondary" id="add-music">Add Music</button>
+                    <div class="control-group">
+                        <label>Beat Sync: <span id="beat-sync-value">70</span>%</label>
+                        <input type="range" class="slider" id="beat-sync" min="0" max="100" value="70">
+                    </div>
+                </div>
+                
+                <button class="btn" id="process-video">Process Video</button>
+                <button class="btn btn-secondary" id="export-video">Export</button>
+            </div>
+            
+            <div id="batch-controls" class="tab-content" style="display: none;">
+                <div class="controls">
+                    <h3 style="margin-bottom: 15px;">Batch Processing</h3>
+                    <button class="btn" id="select-folder">Select Folder</button>
+                    <p style="margin: 10px 0; font-size: 0.9rem; opacity: 0.8;">
+                        <span id="file-count">0</span> files selected
+                    </p>
+                </div>
+                
+                <div class="controls">
+                    <h3 style="margin-bottom: 15px;">AI Culling</h3>
+                    <button class="btn" id="smart-select">Smart Select Best</button>
+                    <button class="btn btn-secondary" id="remove-duplicates">Remove Duplicates</button>
+                </div>
+                
+                <button class="btn" id="process-batch">Process All</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="header">
+                <h1>KONAK Gallery AI</h1>
+                <p style="opacity: 0.9;">Professional Photo & Video Editor with Real AI</p>
+                <div class="ai-badges">
+                    <span class="ai-badge" id="onnx-status">ONNX Ready</span>
+                    <span class="ai-badge" id="mediapipe-status">MediaPipe Active</span>
+                    <span class="ai-badge" id="video-ai-status">Video AI</span>
+                </div>
+            </div>
+            
+            <div class="workspace">
+                <div class="preview-container" id="preview-container">
+                    <div class="drop-zone" id="drop-zone">
+                        <h2 style="margin-bottom: 20px;">Drop files here</h2>
+                        <p style="opacity: 0.8; margin-bottom: 30px;">or click to browse</p>
+                        <button class="btn" style="width: auto;" id="browse-files">Browse Files</button>
+                    </div>
+                </div>
+                
+                <div class="processing-overlay" id="processing-overlay">
+                    <div style="text-align: center;">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 20px;">AI Processing...</p>
+                        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;" id="processing-status">Initializing models...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="status-bar">
+        <div class="status-indicators">
+            <div class="status-indicator">
+                <span class="status-dot" id="backend-status"></span>
+                <span>Backend</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="gpu-status"></span>
+                <span>GPU</span>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="memory-status"></span>
+                <span>Memory</span>
+            </div>
+        </div>
+        <div>
+            <span id="status-message">Ready</span>
+        </div>
+    </div>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>

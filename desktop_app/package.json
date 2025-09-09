@@ -1,0 +1,36 @@
+{
+  "name": "konak-gallery-ai-desktop",
+  "version": "1.0.0",
+  "description": "KONAK Gallery AI - Professional Photo & Video Editor with Real AI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never"
+  },
+  "keywords": ["photo-editor", "ai", "video-editing", "onnx", "machine-learning"],
+  "author": "KONAK Gallery",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "build": {
+    "appId": "com.konakgallery.ai",
+    "productName": "KONAK Gallery AI",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
